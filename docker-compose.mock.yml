@@ -110,30 +110,30 @@ services:
       - test-network
     dns_search: .
 
-  #  userdata.niffler.dc:
-  #    container_name: userdata.niffler.dc
-  #    image: wiremock/wiremock:2.35.0
-  #    ports:
-  #      - "8089:8089"
-  #    restart: always
-  #    networks:
-  #      - niffler-network
-  #    command: [ "--port", "8089" ]
-  #    volumes:
-  #      - ./wiremock/rest:/home/wiremock
-  #    dns_search: .
-
   userdata.niffler.dc:
     container_name: userdata.niffler.dc
-    image: dtuchs/niffler-userdata:latest
-    expose:
-      - "8089"
-    depends_on:
-      auth.niffler.dc:
-        condition: service_healthy
+    image: wiremock/wiremock:2.35.0
+    ports:
+      - "8089:8089"
+    restart: always
     networks:
       - test-network
+    command: [ "--port", "8089" ]
+    volumes:
+      - ./wiremock/rest:/home/wiremock
     dns_search: .
+
+#  userdata.niffler.dc:
+#    container_name: userdata.niffler.dc
+#    image: dtuchs/niffler-userdata:latest
+#    expose:
+#      - "8089"
+#    depends_on:
+#      auth.niffler.dc:
+#        condition: service_healthy
+#    networks:
+#      - test-network
+#    dns_search: .
 
   frontend.niffler.dc:
     container_name: frontend.niffler.dc
@@ -192,12 +192,26 @@ services:
       - niffler-e-2-e
     environment:
       CHECK_RESULTS_EVERY_SECONDS: 3
-      KEEP_HISTORY: 0
+      KEEP_HISTORY: 1
     ports:
       - "5050:5050"
     networks:
       - test-network
     dns_search: .
+
+  allure-ui:
+   container_name: allure-ui
+   image: "frankescobar/allure-docker-service-ui"
+   depends_on:
+     - allure
+   environment:
+    ALLURE_DOCKER_PUBLIC_API_URL: "http://localhost:5050"
+    ALLURE_DOCKER_PUBLIC_API_URL_PREFIX: ""
+   ports:
+    - "5252:5252"
+   networks:
+      - test-network
+   dns_search: .
 
 networks:
   test-network:
